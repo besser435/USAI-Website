@@ -25,7 +25,7 @@ def on_start():
     try:
         logger.info("Server started")
 
-        commits_url = "https://api.github.com/repos/besser435/USA-Industries-Website/commits?per_page=1"
+        commits_url = "https://api.github.com/repos/besser435/USAI-Website/commits?per_page=1"
         latest_commit = json.loads(requests.get(commits_url).text)[0]
         last_commit_date = datetime.datetime.strptime(latest_commit["commit"]["author"]["date"], "%Y-%m-%dT%H:%M:%SZ").strftime("%B %d, %Y")
         logger.info(f"Latest commit: {last_commit_date}")
