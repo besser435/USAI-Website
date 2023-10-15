@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}USA Industries{% endblock %}</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" type="text/css" href="/static/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet">
+
+    <meta property="og:title" content="USA Industries">
+    <meta property="og:description" content="Delivering freedom by the megaton">
+    <meta property="og:image" content="/static/usa_troll.jpg">
+    <meta property="og:url" content="https://www.usa-industries.net/">
+    <meta property="og:site_name" content="USAI">
+    <meta property="og:type" content="website">
+</head>
+
+<body>
+    <div class="logo-slogan">
+        <a href="/" style="text-decoration: none; color: inherit;">
+            <h1>USA Industries</h1>
+            <h2>Delivering freedom by the megaton</h2>
+        </a>
+    </div>
+
+    <div class="sign-in-button">
+        <a href="/sign_in" class="signin-link">
+            <button class="signin-btn">Sign in</button>
+        </a>
+    </div>
+
+    <div>
+        <nav class="navbar" id="navbar">
+            <a id="home-link" href="/">Home</a>
+            <a id="players-link" href="/players">Players</a>
+            <a id="lottery-link" href="/lottery">Lottery</a>
+            <a id="bb-link" href="/bug_bounty">Bug Bounty</a>
+        </nav>
+    </div>
+
+
+    <div class="main-content">
+        <!-- Child documents will go here -->
+        {% block content %}
+        {% endblock %}
+        <!-- End children -->
+    </div>    
+    
+
+    <footer class="footer">
+        <a href="https://discord.gg/9zvFEUuRPn" target="_blank"><i class="fab fa-discord"></i></a> |
+        <a href="https://github.com/besser435/USAI-Website" target="_blank"><i class="fab fa-github"></i></a> |
+        <a href="https://toendallwars.fandom.com/wiki/USA_Industries" target="_blank"><i class="fab fa-wpforms"></i></a>
+        <p id="site-version" style="margin-top: 5px;">Updated {{ last_commit_date }}</p>
+    </footer>
+    <script src="/static/js/base.js"></script>
+</body>    
+</html>

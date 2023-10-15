@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Error 404 - USA Industries{% endblock %}
+{% block content %}
+
+<div class="error-container">
+    <img src="{{ url_for('static', filename='404.webp') }}" alt="Missile coming towards you" class="error-image">
+    <h1 class="error-text">404, page not found</h1>
+</div>
+
+{% endblock %}

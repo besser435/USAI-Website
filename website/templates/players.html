@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Players - USA Industries{% endblock %}
+{% block content %}
+    <script src="/static/js/players.js"></script>
+    <div class="container-player">
+        <h2 style="margin: 20px auto;">TEAW Player Data</h2>
+
+        <input type="text" id="user-search" autocomplete="off" spellcheck="false" class="search" placeholder="Search for a player" autofocus>
+        <a href="#" id="help-button">?</a>
+
+        <div class="player-box">
+            {% for user in offline_users %}
+            <p class="username"><strong>{{ user.username }}</strong> last online <span data-last-online="{{ user.last_on_time }}"></span></p>
+            {% endfor %}
+            <p id="no-users-found" style="display: none;">No players found with that username</p>
+        </div>
+    </div>
+
+
+    <div id="explainerModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h1 style="margin-top: 0px;">What is this?</h1>
+                <p>This page displays the last online time for players, like an offline version of the '/seen' command.
+                The data is updated every 15 seconds (refresh to see changes). If a player's last online time shows as '0 minutes,'
+                it means they are currently online.<br><br>
+    
+                Please note that the data is available only for players who have
+                logged in since September 13th, 2023. If you can't find a specific username, it means that player
+                hasn't logged in since then.
+            </p>
+
+            <h3>Known Issues:</h3>
+                <p>Occasionally, you might see '-1 minutes,' which is due to a time difference between the server and your browser. A fix should be out soon.</p>
+                
+            <h3>Planned Features:</h3>
+                 <p style="margin-bottom: 0px;">We're working on live updates so you won't need to refresh the page for the latest data, and we're adding player skin icons next to their usernames.
+                Additionally, we plan to add more server data such as weather, and the current time.
+            </p>
+        </div>
+    </div>
+{% endblock %}
