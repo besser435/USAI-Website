@@ -23,12 +23,13 @@ function startCounterWhenInView() {
 
     observer.observe(counterElement);
 }
+
 document.addEventListener("DOMContentLoaded", startCounterWhenInView);
 
 
 function chooseAlternateImage() {   // chance for sussy femboy amogus image
-    const randomNumber = Math.floor(Math.random() * 30) + 1;
-    if (randomNumber === 1) {
+    const randomNumber = Math.floor(Math.random() * 30);
+    if (randomNumber === 25) {  // ಥ‿ಥ
         document.getElementById("topImg").src = "/static/imgs/amogus_femboy.png";
     }
 }

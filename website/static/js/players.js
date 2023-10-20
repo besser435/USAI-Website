@@ -1,7 +1,6 @@
 function formatLastOnline(lastOnlineTimestamp) {
     const now = new Date();
     const lastOnline = new Date(parseInt(lastOnlineTimestamp) * 1000); // Convert to milliseconds
-
     const timeDiff = now - lastOnline;
 
     // Calculate time differences
@@ -39,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
         element.textContent = formattedTime;
     });
 
-
+    
     // Search for users in All Players
     const userSearchInput = document.getElementById("user-search");
     const usernames = document.querySelectorAll(".username");
