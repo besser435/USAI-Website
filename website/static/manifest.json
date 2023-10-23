@@ -1,0 +1,23 @@
+{
+    "name": "USA Industries",
+    "short_name": "USAI",
+    "start_url": "/",
+    "icons": [
+        {
+            "src": "/static/imgs/manifest-icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "/static/imgs/manifest-icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable any"
+        }
+    ],
+    "theme_color": "#000000",
+    "background_color": "#ffffff",
+    "display": "fullscreen",
+    "orientation": "portrait"
+}
