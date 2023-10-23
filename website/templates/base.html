@@ -25,7 +25,7 @@
         console.log("Registering service worker...");
         if ("serviceWorker" in navigator) {
           navigator.serviceWorker
-            .register("sw.js")
+            .register("static/js/sw.js")
             .then(function (registration) {
               // Registration was successful
               console.log(
