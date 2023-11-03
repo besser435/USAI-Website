@@ -3,14 +3,14 @@
 {% block content %}
     <div class="box">
         <h2>USAI Lottery</h2>
-        <p>Current Jackpot: <span class="rainbow-text">${{ jackpot }}</span></p>
-        <p>USAI Bonus: ${{ USAI_bonus }}</p>
+        <p>Current Jackpot: <span class="rainbow-text">${{ f_jackpot }}</span></p>
+        <p>USAI Bonus: ${{ f_bonus }}</p>
         <p>Draw date: {{ draw_date}}</p>
     </div>
 
     <div class="box">
         <h2>Buy tickets</h2>
-        <p>Ticket price: ${{ ticket_price }}</p>
+        <p>Ticket price: ${{ f_ticket_price }}</p>
         <p>To buy tickets, contact brandonusa on Discord. (This will be automated eventually)</p>
     </div>
 
@@ -28,18 +28,29 @@
     <div class="box">
         <h3>FAQ</h3>
         <p><em>How are winners selected?</em></p>
-        <code style="text-align: center">entries = [entry["username"] for entry in entries for _ in range(entry["entries"])]<br>
-        winner = random.choice(entries)</code>
+        <code style="text-align: center">
+            entries = [entry["username"] for entry in entries for _ in range(entry["entries"])]<br>
+            winner = random.choice(entries)
+        </code>
 
         <p><em>What is the USAI Bonus?</em></p>
-        <p>The USAI Bonus is additional money added to the jackpot by USAI at no cost to ticket holders.
+        <p>
+            The USAI Bonus is additional money added to the jackpot by USAI at no cost to ticket holders.
             This is to incentivize people to buy tickets due to the larger jackpot.
+        </p>
+
+        <p><em>How much of the jackpot does the winner get?</em></p>
+        <p>
+            The winner is entitled to no less than 85% of the jackpot. The remaining funds are reserved for USAI to use
+            as we see fit. They will mainly to expand the jackpot for future drawings, or for other USAI projects that
+            benefit the public.
         </p>
     </div>
 
     <div class="box">
         <h2>Winners</h2>
         <p>There have been no previous winners. Will you be the first?</p>
+        <!-- TODO make this dynamically updatable like the lottery info -->
         <!--<p><span class="rainbow-text">Winner</span> won $100,000 on August 1st 2023</p> -->
     </div>
     <img class="gamble" style="display: block; margin: auto; width: 15%;" src="/static/imgs/gamble.png" style="width:15%;" alt="Gamble">

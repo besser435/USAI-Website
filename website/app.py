@@ -8,7 +8,7 @@ import requests
 
 from cachetools import TTLCache, cached
 
-from flask import (Flask, redirect, render_template, request,
+from flask import (Flask, redirect, render_template, request, abort,
                    send_from_directory, url_for, jsonify)
 
 app = Flask(__name__)
@@ -36,29 +36,45 @@ on_start()
 
 
 
+# NOTE Variables
+jackpot = 0 
+USAI_bonus = 0
+ticket_price = 0
+draw_date = ""
+
+
+
+# NOTE Helper functions
+def authenticate_api_request():
+    api_key = request.headers.get("API_key")
+    expected_key = os.environ["AUTHORIZED_API_key"]
+
+    if api_key != expected_key:
+        abort(401)  # Unauthorized
+
+
+
 # NOTE Web pages
 @app.context_processor  # Inject the last update date into the footer
 def inject_lcd():
     return {"last_commit_date": last_commit_date}
 
 @app.route("/")
-def hello():
+def hello():    # Home page
    return render_template("home.html")
 
 @app.route("/lottery")  # Lottery page
 def lottery():
-    jackpot = "TBA"
-    USAI_bonus = "TBA"
-    #jackpot = "{:,}".format(jackpot)  # Add commas to jackpot
-    ticket_price = "TBA"
-    #ticket_price = "{:,}".format(ticket_price)  # Add commas to ticket price
-    draw_date = "will be announced after the economy changes"
+
+    f_jackpot = "{:,}".format(jackpot)
+    f_bonus = "{:,}".format(USAI_bonus)
+    f_ticket_price = "{:,}".format(ticket_price)
 
     return render_template(
         "lottery.html",
-        jackpot=jackpot,
-        USAI_bonus=USAI_bonus,
-        ticket_price=ticket_price,
+        f_jackpot=f_jackpot,
+        f_bonus=f_bonus,
+        f_ticket_price=f_ticket_price,
         draw_date=draw_date
     )
 
@@ -102,12 +118,28 @@ def get_player_data():
             all_players = request.json()
             return all_players
         else:
-            logging.error(f"HTTP error on get_player_data: {request.status_code}")
-            return "HTTP error on get_player_data", 500
+            logging.error(f"Internal (hop 1) error on get_player_data: {request.status_code}")
+            return "Internal (hop 1) error on get_player_data", 500
 
     except Exception as e:
-        logging.error(f"Server error on get_player_data: {e}")
-        return "Server error on get_player_data error", 500
+        logging.error(f"Internal error on get_player_data: {e}")
+        return "Internal error on get_player_data", 500
+
+@app.route("/update_lottery", methods=["POST"])
+def update_lottery():
+    authenticate_api_request()
+    global jackpot, USAI_bonus, ticket_price, draw_date
+
+    try:
+        jackpot = int(request.form["jackpot"])
+        USAI_bonus = int(request.form["USAI_bonus"])
+        ticket_price = int(request.form["ticket_price"])
+        draw_date = request.form["draw_date"]
+
+        return 200
+    except Exception as e:
+        logging.error(f"Internal error on update_lottery: {e}")
+        return "Internal error on update_lottery", 500
 
 
 
