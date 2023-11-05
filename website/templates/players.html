@@ -9,6 +9,8 @@
         <a href="#" id="help-button">?</a>
 
         <div class="player-box">
+            <!-- TODO: add total sessions, playtime, and average playtime per session -->
+            <!-- Also add skin profile pictures -->
             {% for user in offline_users %}
             <p class="username"><strong>{{ user.username }}</strong> last online <span data-last-online="{{ user.last_on_time }}"></span></p>
             {% endfor %}

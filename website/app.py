@@ -137,9 +137,6 @@ def update_lottery():
         draw_date = request.form["draw_date"]
 
         return "OK", 200
-        #BUG something throws a typeError. Could it be this? Should it be: return "OK", 200"?
-        
-
     except Exception as e:
         logging.error(f"Internal error on update_lottery: {e}")
         return "Internal error on update_lottery", 500
