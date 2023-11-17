@@ -45,7 +45,7 @@ function createProfilePicture(player) {
 
 
 function updatePlayerInfo() {
-    fetch("https://usa-industries.net/get_all_users")
+    fetch("https://usa-industries.net/get_player_data")
         .then(response => response.json())
         .then(data => {
             const playerBox = document.querySelector(".player-box");
