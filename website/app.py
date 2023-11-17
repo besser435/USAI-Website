@@ -105,8 +105,8 @@ def sign_in():
 
 
 
-# NOTE API endpoints
-cache = TTLCache(maxsize=1, ttl=15)
+# NOTE API stuff
+cache = TTLCache(maxsize=1, ttl=5)
 
 @cached(cache)
 @app.route("/get_player_data", methods=["GET"])
@@ -116,7 +116,7 @@ def get_player_data():
         request = requests.get(PLAYER_API)
         if request.status_code == 200:
             all_players = request.json()
-            return all_players
+            return jsonify(all_players)
         else:
             logging.error(f"Internal (hop 1) error on get_player_data: {request.status_code}")
             return "Internal (hop 1) error on get_player_data", 500
@@ -124,6 +124,34 @@ def get_player_data():
     except Exception as e:
         logging.error(f"Internal error on get_player_data: {e}")
         return "Internal error on get_player_data", 500
+
+@cached(cache)
+@app.route("/get_skin", methods=["GET"])
+def get_skins():
+    if not os.path.exists("/skins/"):
+        os.makedirs("/skins/")
+        logging.info("Created skins directory")
+
+    player = request.args.get("player")
+
+    # test if the skin is in the local repo, if not, use API to fetch it
+    if not os.path.exists(f"/skins/{player}.png"):
+        SKINS_URL = f"http://playteawbeta.apexmc.co:1848/tiles/faces/16x16/{player}.png"    # NOTE should be an envar
+        response = requests.get(SKINS_URL)
+        if response.status_code == 200:
+            with open(f"/skins/{player}.png", "wb") as f:
+                f.write(response.content)
+            logging.info(f"Downloaded skin for {player}")
+            return send_from_directory("/skins/", f"{player}.png")
+        else:
+            logging.error(f"Error downloading skin. {response.status_code}")
+            return "Error downloading skin", 500
+    else:
+        try:
+            return send_from_directory("/skins/", f"{player}.png")
+        except Exception as e:
+            logging.error(f"Error getting skin: {e}")
+            return "Error getting skin", 500
 
 @app.route("/update_lottery", methods=["POST"])
 def update_lottery():

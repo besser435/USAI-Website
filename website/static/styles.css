@@ -355,6 +355,25 @@ p {
     display: none;
 }
 
+.username {
+    display: flex;   /* search is overriding this */
+    align-items: center;
+    margin-bottom: 18px;
+    flex-direction: row;
+}
+
+.p-profile-pic {
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+    border-radius: 10%;
+    image-rendering: pixelated;
+}
+
+.username span {
+    white-space: break-spaces;
+}
+
 
 /* Modals */
 .modal {
@@ -553,5 +572,16 @@ p {
 
     .services-box {
         width: 100%;
+    }
+
+
+    /* Modal */
+    .modal-content {
+        padding: 10px;
+        width: 85%;
+    }
+
+    .close {
+        color: red;
     }
 }
