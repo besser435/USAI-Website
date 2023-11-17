@@ -8,27 +8,22 @@ function formatLastOnline(lastOnlineTimestamp) {
     const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
 
-    let formattedTime = "";
+    let formattedTime = " last seen ";
 
     if (days > 0) {
         formattedTime += `${days} day${days > 1 ? "s" : ""}, `;
     }
-    
+
     if (hours > 0) {
         formattedTime += `${hours} hour${hours > 1 ? "s" : ""}, `;
     }
-    
-    if (timeDiff < 15_000) { // minutes. must be the same as the interval in updatePlayerInfo()
-        formattedTime += `is currently online`;
+
+    if (timeDiff < 15_000) { // effectively minutes. Must be the same as the interval in updatePlayerInfo()
+        formattedTime = " is currently online";
     } else {
         formattedTime += `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
     }
-    
-    // Add "last online" text if not currently online
-    if (!((minutes == 0 || minutes == -1) && !hours && !days)) {
-        formattedTime = `last online ${formattedTime}`;
-    }
-    
+
     return formattedTime;
 }
 
@@ -62,13 +57,19 @@ function updatePlayerInfo() {
 
                 // Username and Last online span
                 const usernameLastOnlineElement = document.createElement("span");
-                usernameLastOnlineElement.innerHTML = `<strong>${player.username}</strong>&nbsp;${formattedLastOnline}`;
+                usernameLastOnlineElement.innerHTML = `<strong>${player.username}</strong>${formattedLastOnline}`;
                 usernameLastOnlineElement.setAttribute("data-last-online", player.last_on_time);
 
                 // Append elements
                 playerElement.appendChild(usernameLastOnlineElement);
                 playerBox.appendChild(playerElement);
             });
+
+            var notFoundElement = document.createElement("p");
+            notFoundElement.setAttribute("id", "no-users-found")
+            notFoundElement.style.display = "none";
+            notFoundElement.textContent = "No players found with that username";
+            playerBox.appendChild(notFoundElement);
         })
         .catch(error => {
             console.error("Error fetching player info:", error);
@@ -90,8 +91,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Search for users in All Players
     const userSearchInput = document.getElementById("user-search");
-    const noUsersFoundMessage = document.getElementById("no-users-found");
-
     let currentSearchText = "";
     userSearchInput.addEventListener("input", function() {
 
@@ -142,6 +141,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         // Display "No players found" message if no users are found
+        const noUsersFoundMessage = document.getElementById("no-users-found");
         if (!usersFound) {
             noUsersFoundMessage.style.display = "block";
         } else {
