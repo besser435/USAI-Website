@@ -14,8 +14,8 @@ function formatLastOnline(lastOnlineTimestamp) {
         formattedTime += `${days} day${days > 1 ? "s" : ""}, `;
     }
 
-    if (hours > 0) {
-        formattedTime += `${hours} hour${hours > 1 ? "s" : ""}, `;
+    if (hours > 0 || days > 0) {
+        formattedTime += `${hours} hour${hours !== 1 ? "s" : ""}, `;
     }
 
     if (timeDiff < 15_000) { // effectively minutes. Must be the same as the interval in updatePlayerInfo()
@@ -141,7 +141,8 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         // Display "No players found" message if no users are found
-        const noUsersFoundMessage = document.getElementById("no-users-found");
+        const noUsersFoundMessage = document.getElementById("no-users-found"); // BUG uncaught TypeError: Cannot read properties of null
+        // Something to do with loading the user data where its created, since the error count varies.
         if (!usersFound) {
             noUsersFoundMessage.style.display = "block";
         } else {
