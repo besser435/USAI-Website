@@ -19,7 +19,22 @@ last_commit_date = None
 PLAYER_API = os.environ["PLAYER_API"]
 
 
-# Run on startup
+# NOTE Variables
+jackpot = 0 
+USAI_bonus = 0
+ticket_price = 0
+draw_date = "TBA"
+
+
+
+# NOTE Helper functions
+def authenticate_api_request():
+    api_key = request.headers.get("API_key")
+    expected_key = os.environ["AUTHORIZED_API_key"]
+
+    if api_key != expected_key:
+        abort(401)  # Unauthorized
+
 def on_start():
     global last_commit_date
     try:
@@ -33,24 +48,6 @@ def on_start():
         last_commit_date = "Error fetching last update"
         logger.error(f"Error fetching last update: {e}")
 on_start()
-
-
-
-# NOTE Variables
-jackpot = 0 
-USAI_bonus = 0
-ticket_price = 0
-draw_date = ""
-
-
-
-# NOTE Helper functions
-def authenticate_api_request():
-    api_key = request.headers.get("API_key")
-    expected_key = os.environ["AUTHORIZED_API_key"]
-
-    if api_key != expected_key:
-        abort(401)  # Unauthorized
 
 
 
@@ -82,7 +79,7 @@ def lottery():
 def bug_bounty():
     return render_template("bug_bounty.html")
 
-@app.route("/players")     # Chat page
+@app.route("/players")  # Chat page
 def players():
     return render_template(
         "players.html",
@@ -133,7 +130,6 @@ def get_skins():
 
     player = request.args.get("player")
 
-    # test if the skin is in the local repo, if not, use API to fetch it
     if not os.path.exists(f"skins/{player}.png"):
         SKINS_URL = f"http://playteawbeta.apexmc.co:1848/tiles/faces/16x16/{player}.png"    # NOTE should be an envar
         response = requests.get(SKINS_URL)
