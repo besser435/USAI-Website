@@ -1,10 +1,10 @@
 import requests
 from usai_secrets import API_KEY as API_KEY
 
-jackpot = 0
-USAI_bonus = 0
-ticket_price = 0
-draw_date = "TBA"
+jackpot = 7500
+USAI_bonus = 7500
+ticket_price = 800
+draw_date = "???"
 
 
 def update_lotto_request():
