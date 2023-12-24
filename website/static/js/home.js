@@ -6,7 +6,7 @@ function startCounterWhenInView() {
         counterElement.innerText = count;
         count++;
 
-        if (count <= 4) {
+        if (count <= 5) {
             setTimeout(updateCounter, 100);
         }
     }
