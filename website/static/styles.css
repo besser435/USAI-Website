@@ -476,7 +476,7 @@ p {
 
 .box {
     background-color: #88878752; /* Background color of the box */
-    padding: 1px; /* Spacing inside the box */
+    padding: 8px; /* Spacing inside the box */
     border-radius: 10px; /* Rounded corners for the box */
     margin: 20px auto; /* Center the box horizontally */
     max-width: 60%; /* Set a maximum width for the box */
