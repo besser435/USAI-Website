@@ -17,6 +17,7 @@ logger = logging.getLogger("logger")
 
 last_commit_date = None
 PLAYER_API = os.environ["PLAYER_API"]
+MISC_API = os.environ["MISC_API"]
 
 
 # NOTE Variables
@@ -30,7 +31,7 @@ draw_date = "TBA"
 # NOTE Helper functions
 def authenticate_api_request():
     api_key = request.headers.get("API_key")
-    expected_key = os.environ["AUTHORIZED_API_key"]
+    expected_key = os.environ["AUTHORIZED_API_KEY"]
 
     if api_key != expected_key:
         abort(401)  # Unauthorized
@@ -103,7 +104,7 @@ def sign_in():
 
 
 # NOTE API stuff
-cache = TTLCache(maxsize=1, ttl=5)
+cache = TTLCache(maxsize=1, ttl=1)
 
 @cached(cache)
 @app.route("/get_player_data", methods=["GET"])
@@ -116,10 +117,23 @@ def get_player_data():
         else:
             logging.error(f"Internal (hop 1) error on get_player_data: {request.status_code}")
             return "Internal (hop 1) error on get_player_data", 500
-
     except Exception as e:
         logging.error(f"Internal error on get_player_data: {e}")
         return "Internal error on get_player_data", 500
+
+@cached(cache)
+@app.route("/get_misc", methods=["GET"])
+def get_misc():
+    try:
+        request = requests.get(MISC_API)
+        if request.status_code == 200:
+            return request.json()
+        else:
+            logging.error(f"Internal (hop 1) error on get_misc: {request.status_code}")
+            return "Internal (hop 1) error on get_misc", 500
+    except Exception as e:
+        logging.error(f"Internal error on get_misc: {e}")
+        return "Internal error on get_misc", 500
 
 @cached(cache)
 @app.route("/get_skin", methods=["GET"])
@@ -129,8 +143,8 @@ def get_skins():
         logging.info("Created skins directory")
 
     player = request.args.get("player")
-
-    if not os.path.exists(f"skins/{player}.png"):
+    # Create skins for new platers/give skins a TTL of 4 hours
+    if not os.path.exists(f"skins/{player}.png")  or (time.time() - os.path.getmtime(f"skins/{player}.png")) > 14400:
         SKINS_URL = f"http://playteawbeta.apexmc.co:1848/tiles/faces/16x16/{player}.png"    # NOTE should be an envar
         response = requests.get(SKINS_URL)
         if response.status_code == 200:
