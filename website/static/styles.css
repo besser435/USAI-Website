@@ -374,6 +374,36 @@ p {
     white-space: break-spaces;
 }
 
+.info-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: stretch;
+    margin-top: 20px;
+}
+
+.info-card {
+    background-color: #333;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    flex: 1;
+    margin: 0 10px;
+}
+
+.info-card h3 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    color: #fff;
+    font-size: 14px;
+}
+
+.info-card p {
+    font-size: 26px;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
 
 /* Modals */
 .modal {

@@ -5,16 +5,36 @@
     <div class="container-player">
         <h2 style="margin: 20px auto;">TEAW Player Data</h2>
 
-        <input type="text" id="user-search" autocomplete="off" spellcheck="false" class="search" placeholder="Search for a player" autofocus>
+        <input type="text" id="user-search" autocomplete="off" spellcheck="false" class="search" placeholder="Search for a player">
         <a href="#" id="help-button">?</a>
 
         <div class="player-box">
-            <!-- TODO: add total sessions, playtime, and average playtime per session -->
-            <!-- Go from the current list system to a fancier grid one -->
+            <!-- TODO Go from the current list system to a fancier grid one -->
             <p>Loading...</p>
         </div>
-    </div>
 
+        <div class="info-container">
+            <div class="info-card">
+                <h3>Online Players</h3>
+                <p id="online-player-count">Loading...</p>
+            </div>
+
+            <div class="info-card">
+                <h3>Weather</h3>
+                <p id="weather">Loading...</p>
+            </div>
+        
+            <!-- <div class="info-card">
+                <h3>Time</h3>
+                <p id="time">Loading...</p>
+            </div> -->
+        
+            <div class="info-card">
+                <h3>Total Players</h3>
+                <p id="total-player-count">Loading...</p>
+            </div>
+        </div>
+    </div>
 
     <div id="explainerModal" class="modal">
         <div class="modal-content">
@@ -26,14 +46,13 @@
                 Please note that the data is available only for players who have
                 logged in since September 13th, 2023. If you can't find a specific username, it means that player
                 hasn't logged in since then.
-            </p>
+                </p>
 
             <h3>Known Issues:</h3>
                 <p>The info box flashes when there is a search present on each update.</p>
                 
             <h3>Planned Features:</h3>
-                <p style="margin-bottom: 0px;">We plan to add more server data such as weather, and the current time.</p>
-                <p>Make the box a portion of the viewport size.</p>
+                <p style="margin-bottom: 0px;">We plan to improve the UI into a fancy grid, and show more data about each player.</p>
         </div>
     </div>
 {% endblock %}

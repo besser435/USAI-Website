@@ -39,12 +39,14 @@ function createProfilePicture(player) {
 }
 
 
+let onlinePlayerCount = 0;
 function updatePlayerInfo() {
-    fetch("https://usa-industries.net/get_player_data")
+    fetch("/get_player_data")
         .then(response => response.json())
         .then(data => {
             const playerBox = document.querySelector(".player-box");
             playerBox.innerHTML = "";
+            onlinePlayerCount = 0;
 
             data.forEach(player => {
                 const formattedLastOnline = formatLastOnline(player.last_on_time);
@@ -63,7 +65,14 @@ function updatePlayerInfo() {
                 // Append elements
                 playerElement.appendChild(usernameLastOnlineElement);
                 playerBox.appendChild(playerElement);
+                
+                // Check if player is online
+                if (player.last_on_time > Math.floor(Date.now() / 1000) - 15) {
+                    onlinePlayerCount++;
+                }
             });
+            
+            updateMiscData();
 
             var notFoundElement = document.createElement("p");
             notFoundElement.setAttribute("id", "no-users-found")
@@ -77,6 +86,36 @@ function updatePlayerInfo() {
 }
 updatePlayerInfo();
 setInterval(updatePlayerInfo, 15_000);
+
+
+function updateMiscData() {
+    // Less than ideal way of doing this, but it works.
+    // At this point I should just use the Minecraft protocol's ping packet
+    const onlinePlayerCountElement = document.getElementById("online-player-count");
+    if (onlinePlayerCountElement) {
+        onlinePlayerCountElement.textContent = onlinePlayerCount;
+    }
+
+    const totalPlayerCountElement = document.getElementById("total-player-count");
+    if (totalPlayerCountElement) {
+        totalPlayerCountElement.textContent = `${document.querySelectorAll(".username").length}`;
+    }
+
+    fetch("/get_misc")
+        .then(response => response.json())
+        .then(data => {
+            const weather = data.weather;
+            const weatherElement = document.getElementById("weather");
+            weatherElement.textContent = weather;
+
+            //const heartbeat = data.heartbeat;
+            //const heartbeatElement = document.getElementById("heartbeat");
+            //heartbeatElement.textContent = heartbeat;
+        })
+        .catch(error => {
+            console.error("Error fetching misc data:", error);
+        });
+}
 
 
 document.addEventListener("DOMContentLoaded", function () {
