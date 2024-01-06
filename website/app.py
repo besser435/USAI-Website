@@ -5,6 +5,7 @@ import subprocess
 import json
 import datetime
 import requests
+import app_secrets
 
 from cachetools import TTLCache, cached
 
@@ -16,8 +17,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("logger")
 
 last_commit_date = None
-PLAYER_API = os.environ["PLAYER_API"]
-MISC_API = os.environ["MISC_API"]
+PLAYER_API = app_secrets.PLAYER_API 
+MISC_API = app_secrets.MISC_API
+AUTHORIZED_API_KEY= app_secrets.AUTHORIZED_API_KEY
 
 
 # NOTE Variables
@@ -27,13 +29,11 @@ ticket_price = 0
 draw_date = "TBA"
 
 
-
 # NOTE Helper functions
 def authenticate_api_request():
     api_key = request.headers.get("API_key")
-    expected_key = os.environ["AUTHORIZED_API_KEY"]
 
-    if api_key != expected_key:
+    if api_key != AUTHORIZED_API_KEY:
         abort(401)  # Unauthorized
 
 def on_start():
@@ -143,7 +143,7 @@ def get_skins():
         logging.info("Created skins directory")
 
     player = request.args.get("player")
-    # Create skins for new platers/give skins a TTL of 4 hours
+    # Create skins for new players/give skins a TTL of 4 hours
     if not os.path.exists(f"skins/{player}.png")  or (time.time() - os.path.getmtime(f"skins/{player}.png")) > 14400:
         SKINS_URL = f"http://playteawbeta.apexmc.co:1848/tiles/faces/16x16/{player}.png"    # NOTE should be an envar
         response = requests.get(SKINS_URL)
