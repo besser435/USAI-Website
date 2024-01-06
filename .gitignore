@@ -2,4 +2,6 @@
 website/templates/no_unlock.html
 website/no_unlock_code.py
 lottery/usai_secrets.py
+website/app_secrets.py
+
 lottery/11-19-23
