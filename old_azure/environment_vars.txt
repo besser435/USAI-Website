@@ -1,0 +1,3 @@
+AUTHORIZED_API_KEY
+MISC_API=/get_misc
+PLAYER_API=/get_all_users
