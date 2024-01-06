@@ -1,0 +1,3 @@
+PLAYER_API = ""
+MISC_API = ""
+AUTHORIZED_API_KEY = ""
