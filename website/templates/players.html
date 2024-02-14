@@ -2,16 +2,153 @@
 {% block title %}Players - USA Industries{% endblock %}
 {% block content %}
     <script src="/static/js/players.js"></script>
-    <div class="container-player">
         <h2 style="margin: 20px auto;">TEAW Player Data</h2>
 
-        <input type="text" id="user-search" autocomplete="off" spellcheck="false" class="search" placeholder="Search for a player">
-        <a href="#" id="help-button">?</a>
 
-        <div class="player-box">
-            <!-- TODO Go from the current list system to a fancier grid one -->
-            <p>Loading...</p>
+        <input type="text" id="user-search" autocomplete="off" spellcheck="false" class="search" placeholder="Search for players, towns, or nations">
+        <a href="#" id="help-button">?</a>
+        <h3>Click on a player for more info</h3>
+        <div class="main-players">
+            <div class="player-grid-container"></div>
         </div>
+        <div id="playerTooltip" class="tooltip-content" style="display: none;"></div>
+
+        <style> 
+            /* TODO: responsive design 
+            pfp should be em units. they seem to ignore the padding though
+            BUG em scales well, but overflows in the container
+            */
+
+            .main-players {
+                border: 1px solid #666565;
+                border-radius: 14px;
+                max-height: 60vh;
+                overflow-y: auto;
+            }
+
+            .player-username, .player-last-online, .player-town {
+                white-space: normal;       /* Keeps the text in a single line */
+                overflow: hidden;          /* Hides any content that overflows the element's box */
+                text-overflow: ellipsis;   /* Adds an ellipsis to indicate that there is more content */
+            }
+
+            .player-grid-container {
+                display: grid;
+                /* BUG em scales well, but overflows in the container */
+                grid-template-columns: repeat(auto-fill, minmax(10.5em, 1fr));
+                grid-gap: 10px;
+                margin: 6px;
+            }
+
+            /* Player Cards */
+            .player-card {
+                background-color: #333;
+                padding: 10px;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                transition: box-shadow 0.15s ease-in-out, transform 0.15s ease-in-out;
+            }
+
+            .player-card:hover {
+                box-shadow: 0 6px 12px rgba(93, 93, 93, 0.388); /* Larger shadow for the hover effect */
+            }
+            /* TODO: do the border radius thing 
+            https://cloudfour.com/thinks/the-math-behind-nesting-rounded-corners/
+            */
+            .player-profile-pic {
+                height: 4em;
+                border-radius: 5%; 
+                image-rendering: pixelated;
+            }
+
+            .player-username {
+                margin-top: 3px;
+                margin-bottom: 0px;
+                font-size: 18px;
+                font-weight: bold;
+                color: #fff;
+            }
+
+            .player-last-online {
+                margin-bottom: 0px;
+                color: #a1a1a1;
+            }
+
+            .player-town {
+                margin-bottom: 0px;
+                color: #a1a1a1;
+
+                white-space: normal;
+                word-break: break-word;
+                overflow-wrap: break-word;
+            }
+
+
+            /* Media query for smaller screens */
+            @media screen and (max-width: 950px) { /* Adjust 600px to the breakpoint you need */
+                .player-profile-pic {
+                    height: 2em; /* Smaller size for smaller screens */
+                    /* other styles if needed */
+                }
+            }
+
+
+            /* Info Cards */
+            .info-container {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-around;
+                align-items: stretch;
+                margin-top: 12px;
+            }
+
+            .info-card {
+                position: relative;
+                flex-basis: 20%; /* Adjust this percentage based on how many items you want in a row */
+                margin: 10px;
+                /* Additional styling for info-card */
+            }
+
+            .tooltip-icon {
+                position: absolute;
+                top: -10px;
+                right: -10px;
+                width: 20px;
+                height: 20px;
+                line-height: 20px;
+                text-align: center;
+                background-color: #606060;
+                color: #fff;
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 14px; 
+            }
+
+            .tooltip-content {
+                visibility: hidden;
+                width: 120px;
+                background-color: #606060;
+                color: #ffffff;
+                text-align: center;
+                border-radius: 6px;
+                padding: 5px 10px;
+                position: absolute;
+                z-index: 1;
+                bottom: 25px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+
+
+            .tooltip-icon:hover .tooltip-content {
+                visibility: visible;
+            }
+        </style>
 
         <div class="info-container">
             <div class="info-card">
@@ -20,21 +157,33 @@
             </div>
 
             <div class="info-card">
-                <h3>Weather</h3>
-                <p id="weather">Loading...</p>
+                <h3>Active Players</h3>
+                <p id="total-active-count">Loading...</p>
+                <span id="active-info-tooltip" class="tooltip-icon">ℹ️
+                    <span class="tooltip-content">Active players are counted if they have been online in the last 14 days.</span>
+                </span>
             </div>
-        
-            <!-- <div class="info-card">
-                <h3>Time</h3>
-                <p id="time">Loading...</p>
-            </div> -->
         
             <div class="info-card">
                 <h3>Total Players</h3>
                 <p id="total-player-count">Loading...</p>
             </div>
+            <div class="info-card">
+                <h3>Weather</h3>
+                <p id="weather">Loading...</p>
+            </div>
+        
+            <div class="info-card">
+                <h3>Most Populous Town</h3>
+                <p id="most-populous-town">Loading...</p>
+            </div>
+
+            <div class="info-card">
+                <h3>Most Populous Nation</h3>
+                <p id="most-populous-nation">Loading...</p>
+            </div>
         </div>
-    </div>
+
 
     <div id="explainerModal" class="modal">
         <div class="modal-content">
@@ -49,10 +198,10 @@
                 </p>
 
             <h3>Known Issues:</h3>
-                <p>The info box flashes when there is a search present on each update.</p>
+                <p>No known issues. See <a href="https://usa-industries.net/bug_bounty" target="_blank">Bug Bounty</a> to report any.</p>
                 
             <h3>Planned Features:</h3>
-                <p style="margin-bottom: 0px;">We plan to improve the UI into a fancy grid, and show more data about each player.</p>
+                <p style="margin-bottom: 0px;">None for now.</p>
         </div>
     </div>
 {% endblock %}

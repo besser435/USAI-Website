@@ -178,6 +178,7 @@ p {
 
 .navbar a:hover {
     background-color: #555;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* TODO: add to other places for parity  */
 }
 
 .section-spacing {
@@ -314,14 +315,14 @@ p {
     padding: 10px;
     color: #ccc;
     font-size: 16px;
-    width: 60%;
+    width: 74%;
     transition: border-color 0.2s, box-shadow 0.2s;
 
     /* Add a subtle box-shadow when focused */
     &:focus {
         outline: none;
-        border-color: #007BFF; /* Change border color on focus */
-        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add a box-shadow on focus */
+        border-color: #007BFF;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
     }
 }
 
@@ -339,7 +340,7 @@ p {
     font-size: 18px;
     text-decoration: none;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: background-color 0.2s;
 }
 
 #help-button:hover {
@@ -402,6 +403,91 @@ p {
     font-size: 26px;
     margin-top: 0;
     margin-bottom: 0;
+}
+
+
+/* Chat page */
+.chat-messages {
+    flex: 3;
+    padding-right: 20px;
+    margin-bottom: 5px;
+    position: relative;
+}
+
+.message-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.cl-profile-pic {
+    width: 16px;
+    height: auto;
+    margin-right: 8px;
+    border-radius: 10%;
+    image-rendering: pixelated;
+}
+
+#message-window p {
+    margin: 0;
+}
+
+.online-users {
+    flex: 1;
+    margin-bottom: 20px;
+}
+
+.user-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 17px;
+}
+
+.op-profile-pic {
+    width: 25px;
+    height: auto;
+    margin-right: 10px;
+    border-radius: 10%;
+    image-rendering: pixelated;
+}
+
+#online-user-window p {
+    margin: 0;
+}
+
+.message-box {
+    height: 35vh;
+    overflow-y: auto; /* Use a scroll bar when the content exceeds the max height */
+    padding: 10px;
+    margin-top: -15px;
+
+    border: 1px solid #666565;
+    border-radius: 14px
+}
+
+.chat-page {
+    display: flex;
+}
+
+#scroll-to-bottom {
+    /* Scroll down button CSS */
+    position: absolute;
+    bottom: 162px;
+    right: 38px;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.25s ease-in-out;
+    font-size: 24px;
+}
+
+#scroll-to-bottom:hover {
+    background-color: #0056b3;
 }
 
 
@@ -577,6 +663,18 @@ p {
         max-width: 100%;
     }
 
+    /* Chat page */
+    .chat-page {
+        flex-direction: column;
+    }
+
+    .box {
+        max-width: 100%;
+    }
+
+    .chat-messages {
+        padding-right: 0;
+    }
 
     /* Home page */
     .who-we-are {

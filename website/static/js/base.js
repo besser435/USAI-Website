@@ -10,7 +10,11 @@ switch (currentPath) {
         lotteryLink.classList.add("active");
         break;
     case "/players":
-        const chatLink = document.getElementById("players-link");
+        const playersLink = document.getElementById("players-link");
+        playersLink.classList.add("active");
+        break;
+    case "/chat":
+        const chatLink = document.getElementById("chat-link");
         chatLink.classList.add("active");
         break;
     case "/bug_bounty":

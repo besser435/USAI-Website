@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Chat - USA Industries{% endblock %}
+{% block content %}
+    <p id="error-message" style="color: red; font-size: 30px; margin-bottom: -20px; display: none;"></p>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/favico.js/0.3.10/favico.min.js"></script>
+    <script src="/static/js/chat.js"></script>
+
+    <!-- 
+        BUG: div isnt moved down a bit, causing the footer
+        to change positions between pages. Something to do 
+        with the flex box
+
+        Mlgcar bug: Change formatting to break long words
+    -->
+    <div class="chat-page">
+        <div class="chat-messages">
+            <h2>Chat Messages</h2>
+            <div class="message-box" id="message-window"></div>
+
+            <div style="margin-top: 7px;">
+                <div class="chat-messages">
+                    <input type="checkbox" id="auto-scroll" checked>
+                    <label for="auto-scroll">Auto Scroll</label>
+                </div>
+
+                <!-- <form id="send-message-form">
+                    <input id="authorization" class="search" placeholder="Auth Code" autocomplete="username" required>
+                    <input id="message" class="search" placeholder="Message" required></input>
+                    <button type="button" onclick="sendMessage()">Send Message</button>
+                    <p id="message-status" style="display: inline;"></p>
+                </form> -->
+
+                <br>
+                <p style="font-size: 12px;">Last <span id="messge-count">1,000</span> messages shown. Timestamps are in UTC -07:00</p>
+                <p style="font-size: 12px;">Messages go back to August 8, 2023. To request more, contact brandonusa.</p>
+                <p style="font-size: 12px;" id="all-heart-beat">Last update: <span id="heartbeat">{{ heartbeat }}</span></p>
+                <p style="font-size: 12px;">Weather: <span id="weather"></span></p>
+                <button id="scroll-to-bottom" onclick="scrollToBottom()">&#9660;</button>
+            </div>
+        </div>
+    
+
+        <div class="online-users">
+            <h2>Online Players <span id="player-count"></span></h2>
+            <div class="message-box" id="online-user-window">
+                <p>No one is online</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -8,77 +8,130 @@ function formatLastOnline(lastOnlineTimestamp) {
     const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
 
-    let formattedTime = " last seen ";
-
-    if (days > 0) {
-        formattedTime += `${days} day${days > 1 ? "s" : ""}, `;
-    }
-
-    if (hours > 0 || days > 0) {
-        formattedTime += `${hours} hour${hours !== 1 ? "s" : ""}, `;
-    }
-
-    if (timeDiff < 15_000) { // effectively minutes. Must be the same as the interval in updatePlayerInfo()
-        formattedTime = " is currently online";
+    if (timeDiff < 15_000) { // Same as the online check interval
+        return "Currently online";
+    } else if (days > 0) {
+        return `Online ${days} day${days > 1 ? "s" : ""} ago`;
+    } else if (hours > 0) {
+        return `Online ${hours} hour${hours !== 1 ? "s" : ""} ago`;
     } else {
-        formattedTime += `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
+        return `Online ${minutes} min${minutes !== 1 ? "s" : ""} ago`;
     }
-
-    return formattedTime;
 }
 
+// NOTE does not show text when no players are found
+function searchForPlayers(searchText) {
+    const playerCards = document.querySelectorAll(".player-card");
 
-function createProfilePicture(player) {
-    const profilePic = document.createElement("img");
-    profilePic.className = "p-profile-pic";
-    profilePic.src = `https://usa-industries.net/get_skin?player=${player.username}`;
-    profilePic.alt = "Profile Picture";
-    profilePic.setAttribute("data-username", player.username);
+    const noUsersFoundElement = document.getElementById("no-users-found");
+    
+    playerCards.forEach(card => {
+        const username = card.getAttribute('data-username').toLowerCase();
+        const town = card.getAttribute('data-town').toLowerCase();
+        const nation = card.getAttribute('data-nation').toLowerCase();
 
-    return profilePic;
+        // Check if the card's data matches the search text
+        if (username.includes(searchText) || town.includes(searchText) || nation.includes(searchText)) {
+            card.style.display = "";
+        } else {
+            card.style.display = "none";
+        }
+
+        if (document.querySelectorAll(".player-card[style='display: none;']").length === playerCards.length) {
+            noUsersFoundElement.style.display = "";
+        }
+    });
 }
+
 
 
 let onlinePlayerCount = 0;
+let activePlayerCount = 0;
 function updatePlayerInfo() {
     fetch("/get_player_data")
         .then(response => response.json())
         .then(data => {
-            const playerBox = document.querySelector(".player-box");
-            playerBox.innerHTML = "";
+            const playerGridContainer = document.querySelector(".player-grid-container");
+            playerGridContainer.innerHTML = ""; // Clear existing cards
             onlinePlayerCount = 0;
+            activePlayerCount = 0;
 
             data.forEach(player => {
-                const formattedLastOnline = formatLastOnline(player.last_on_time);
-                const playerElement = document.createElement("div");
-                playerElement.className = "username";
 
-                // Profile picture
-                const profilePic = createProfilePicture(player);
-                playerElement.appendChild(profilePic);
+                // TODO: Doing this crap for each card, on every update is 
+                // mega stupid. This should be fixed soon, and make it so
+                // cards can be flipped, not show stupid tooltips or alerts.
 
-                // Username and Last online span
-                const usernameLastOnlineElement = document.createElement("span");
-                usernameLastOnlineElement.innerHTML = `<strong>${player.username}</strong>${formattedLastOnline}`;
-                usernameLastOnlineElement.setAttribute("data-last-online", player.last_on_time);
+                // Could maybe just keep a list of flipped cards on each update,
+                // then re-flip them after an update comes in. Idk, I hate it here.
 
-                // Append elements
-                playerElement.appendChild(usernameLastOnlineElement);
-                playerBox.appendChild(playerElement);
+            
+                // Create the card
+                const playerCard = document.createElement("div");
+                playerCard.className = "player-card";
+
+                // Set data attributes
+                playerCard.setAttribute('data-username', player.username);
+                playerCard.setAttribute('data-town', player.town);
+                playerCard.setAttribute('data-nation', player.nation);
+
+                // Add the profile picture
+                const profilePic = document.createElement("img");
+                profilePic.className = "player-profile-pic";
+                profilePic.src = `/get_skin?player=${player.username}`;
+                profilePic.alt = "Profile Picture";
+                playerCard.appendChild(profilePic);
                 
+                // Add the username
+                const username = document.createElement("p");
+                username.className = "player-username";
+                username.textContent = player.username;
+                playerCard.appendChild(username);
+                
+                // Add the last online info
+                const formattedLastOnline = formatLastOnline(player.last_on_time);
+                const lastOnline = document.createElement("p");
+                lastOnline.className = "player-last-online";
+                lastOnline.textContent = formattedLastOnline;
+                playerCard.appendChild(lastOnline);
+
+                // TODO: Redo everything to support card flipping
+                playerCard.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    alert("Player: " + player.username + "\n" +
+                    "Town: " + player.town + "\n" +
+                    "Nation: " + player.nation + "\n");
+                });
+
+
+                playerGridContainer.appendChild(playerCard);
                 // Check if player is online
                 if (player.last_on_time > Math.floor(Date.now() / 1000) - 15) {
                     onlinePlayerCount++;
                 }
+                
+                // Check if player is active
+                const lastOnlineTime = parseInt(player.last_on_time);
+                const activeDaysAgo = new Date().getTime() / 1000 - (14 * 24 * 60 * 60);
+                if (lastOnlineTime >= activeDaysAgo) {
+                    activePlayerCount++;
+                }
             });
-            
-            updateMiscData();
+
+
+            updateMiscData(data);
+
+            // Reapply search after updating cards
+            const userSearchInput = document.getElementById("user-search");
+            const searchText = userSearchInput.value.toLowerCase();
+            searchForPlayers(searchText);
+
 
             var notFoundElement = document.createElement("p");
             notFoundElement.setAttribute("id", "no-users-found")
             notFoundElement.style.display = "none";
-            notFoundElement.textContent = "No players found with that username";
-            playerBox.appendChild(notFoundElement);
+            notFoundElement.textContent = "No players found";
+            playerGridContainer.appendChild(notFoundElement);
         })
         .catch(error => {
             console.error("Error fetching player info:", error);
@@ -88,18 +141,61 @@ updatePlayerInfo();
 setInterval(updatePlayerInfo, 15_000);
 
 
-function updateMiscData() {
-    // Less than ideal way of doing this, but it works.
-    // At this point I should just use the Minecraft protocol's ping packet
+function updateMiscData(data) {
     const onlinePlayerCountElement = document.getElementById("online-player-count");
     if (onlinePlayerCountElement) {
         onlinePlayerCountElement.textContent = onlinePlayerCount;
     }
 
+    const activePlayerCountElement = document.getElementById("total-active-count");
+    if (activePlayerCountElement) {
+        activePlayerCountElement.textContent = activePlayerCount;
+    }
+
     const totalPlayerCountElement = document.getElementById("total-player-count");
     if (totalPlayerCountElement) {
-        totalPlayerCountElement.textContent = `${document.querySelectorAll(".username").length}`;
+        totalPlayerCountElement.textContent = `${document.querySelectorAll(".player-username").length}`;
     }
+
+
+
+
+    const townCounts = {};
+    const nationCounts = {};
+
+    data.forEach(player => {
+        // Only count players who are in a town and have a nation
+        if (player.town !== "N/A" && player.nation !== "N/A") {
+            townCounts[player.town] = (townCounts[player.town] || 0) + 1;
+            nationCounts[player.nation] = (nationCounts[player.nation] || 0) + 1;
+        }
+    });
+
+    let mostPopulousTown = { name: "", count: 0 };
+    let mostPopulousNation = { name: "", count: 0 };
+
+    for (const town in townCounts) {
+        if (townCounts[town] > mostPopulousTown.count) {
+            mostPopulousTown = { name: town, count: townCounts[town] };
+        }
+    }
+
+    for (const nation in nationCounts) {
+        if (nationCounts[nation] > mostPopulousNation.count) {
+            mostPopulousNation = { name: nation, count: nationCounts[nation] };
+        }
+    }
+
+    const populousTownElement = document.getElementById("most-populous-town");
+    if (populousTownElement) {
+        populousTownElement.textContent = `${mostPopulousTown.name} (${mostPopulousTown.count})`;
+    }
+
+    const populousNationElement = document.getElementById("most-populous-nation");
+    if (populousNationElement) {
+        populousNationElement.textContent = `${mostPopulousNation.name} (${mostPopulousNation.count})`;
+    }
+
 
     fetch("/get_misc")
         .then(response => response.json())
@@ -107,18 +203,22 @@ function updateMiscData() {
             const weather = data.weather;
             const weatherElement = document.getElementById("weather");
             weatherElement.textContent = weather;
-
-            //const heartbeat = data.heartbeat;
-            //const heartbeatElement = document.getElementById("heartbeat");
-            //heartbeatElement.textContent = heartbeat;
         })
         .catch(error => {
             console.error("Error fetching misc data:", error);
         });
 }
 
-
 document.addEventListener("DOMContentLoaded", function () {
+    // Loading animation
+    const playerGridContainer = document.querySelector(".player-grid-container");
+    for (let i = 0; i < 200; i++) {
+        const playerCard = document.createElement("div");
+        playerCard.className = "player-card";
+        playerGridContainer.appendChild(playerCard);
+    }
+
+
     // Last online time formatter
     const lastOnlineElements = document.querySelectorAll("[data-last-online]");
     lastOnlineElements.forEach((element) => {
@@ -128,68 +228,11 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
-    // Search for users in All Players
     const userSearchInput = document.getElementById("user-search");
-    let currentSearchText = "";
     userSearchInput.addEventListener("input", function() {
-
         const searchText = userSearchInput.value.toLowerCase();
-        currentSearchText = searchText;
-
-        // NOTE search function, but without auto updates and the stupid reapplySearch function
-        // const usernames = document.querySelectorAll(".username");   // Has to be here, not above event listener
-        // let usersFound = false;
-        
-        // usernames.forEach(function(username) {
-        //     const usernameText = username.querySelector("strong").innerText.toLowerCase(); // Fetch strong element as to only get username
-        //     if (usernameText.includes(searchText)) {
-        //         //username.style.display = "block";
-        //         usersFound = true;
-        //         console.log("found");
-        //     } else {
-        //         //username.style.display = "none";
-        //     }
-        // });
-    
-        // // Display "No players found" message if no users are found
-        // if (!usersFound) {
-        //     noUsersFoundMessage.style.display = "block";
-        // } else {
-        //     noUsersFoundMessage.style.display = "none";
-        // }
-    })
-
-
-    function reapplySearch() {  // this is so stupid
-        // maybe just pause updates while in a search
-        // or just do this the right way and require the event listener on updates.
-        
-        userSearchInput.value = currentSearchText;
-
-        const usernames = document.querySelectorAll(".username");
-        let usersFound = false;
-
-        usernames.forEach(function (username) {
-            const usernameText = username.querySelector("strong").innerText.toLowerCase();
-            if (usernameText.includes(currentSearchText)) {
-                username.style.display = "flex";    // see CSS .username display: value
-                usersFound = true;
-            } else {
-                username.style.display = "none";
-            }
-        });
-
-        // Display "No players found" message if no users are found
-        const noUsersFoundMessage = document.getElementById("no-users-found"); // BUG uncaught TypeError: Cannot read properties of null
-        // Something to do with loading the user data where its created, since the error count varies.
-        if (!usersFound) {
-            noUsersFoundMessage.style.display = "block";
-        } else {
-            noUsersFoundMessage.style.display = "none";
-        }
-    }
-    setInterval(reapplySearch, 10);
-
+        searchForPlayers(searchText);
+    });
 
 
     // Modal
