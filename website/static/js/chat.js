@@ -90,8 +90,16 @@ function fetchNewMessages() {
                 messageContainer.classList.add("message-container");
 
                 const clProfilePic = document.createElement("img");
-                clProfilePic.src = `/get_skin?player=${message.sender}`;
                 clProfilePic.classList.add("cl-profile-pic");
+                if (message.sender === "[SYSTEM]") {
+                    clProfilePic.src = `/static/[SYSTEM].png`;
+                }
+                else if (message.sender.includes("[Discord]")) {
+                    clProfilePic.src = `/static/imgs/discord.png`;
+                }
+                else {                
+                    clProfilePic.src = `/get_skin?player=${message.sender}`;
+                }
 
                 const newMessage = document.createElement("p");
                 const timestamp = new Date(parseInt(message.timestamp));
