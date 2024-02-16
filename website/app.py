@@ -6,6 +6,7 @@ import json
 import datetime
 import requests
 import app_secrets
+import csv
 
 from cachetools import TTLCache, cached
 
@@ -20,6 +21,8 @@ last_commit_date = None
 PLAYER_API = app_secrets.PLAYER_API 
 MISC_API = app_secrets.MISC_API
 AUTHORIZED_API_KEY= app_secrets.AUTHORIZED_API_KEY
+ONLINE_USERS_API = app_secrets.ONLINE_USERS_API
+CHAT_PATH = app_secrets.CHAT_PATH
 
 
 # NOTE Variables
@@ -63,7 +66,6 @@ def hello():    # Home page
 
 @app.route("/lottery")  # Lottery page
 def lottery():
-
     f_jackpot = "{:,}".format(jackpot)
     f_bonus = "{:,}".format(USAI_bonus)
     f_ticket_price = "{:,}".format(ticket_price)
@@ -101,7 +103,9 @@ def page_not_found(error):
 def sign_in():
     return render_template("sign_in.html")
 
-
+@app.route("/chat")  # Chat page
+def chat():
+    return render_template("chat.html")
 
 # NOTE API stuff
 cache = TTLCache(maxsize=1, ttl=1)
@@ -162,6 +166,38 @@ def get_skins():
             logging.error(f"Error getting skin: {e}")
             return "Error getting skin", 500
 
+@cached(cache)
+@app.route("/get_online_users", methods=["GET"])
+def get_online_users():
+    try:
+        request = requests.get(ONLINE_USERS_API)
+        if request.status_code == 200:
+            return request.json()
+        else:
+            logging.error(f"Internal (hop 1) error on get_misc: {request.status_code}")
+            return "Internal (hop 1) error on get_misc", 500
+    except Exception as e:
+        logging.error(f"Internal error on get_misc: {e}")
+        return "Internal error on get_misc", 500
+
+@app.route("/get_new_messages", methods=["GET"])    # Update chat messages on /chat
+def get_new_messages():
+    messages = []
+    last_timestamp = request.args.get("lastTimestamp", default="0")  # Get last timestamp from query parameter
+    try:
+        with open(CHAT_PATH, "r") as f:
+            reader = csv.reader(f)
+            next(reader)  # Skip the header line
+            lines = list(reader)
+
+            for line in lines[-1000:]:  # Get the last x messages from the end of the list
+                timestamp, sender, message = line
+                if timestamp > last_timestamp:  # Check if message is newer than the last displayed timestamp
+                    messages.append({"timestamp": timestamp, "sender": sender, "message": message})
+    except FileNotFoundError:
+        print("Chat log file not found")
+    return messages
+
 @app.route("/update_lottery", methods=["POST"])
 def update_lottery():
     authenticate_api_request()
@@ -177,7 +213,6 @@ def update_lottery():
     except Exception as e:
         logging.error(f"Internal error on update_lottery: {e}")
         return "Internal error on update_lottery", 500
-
 
 
 if __name__ == "__main__":
