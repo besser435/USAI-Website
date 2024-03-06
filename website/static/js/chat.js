@@ -139,6 +139,11 @@ function fetchMiscData() {
     fetch("/get_misc")
         .then((response) => response.json())
         .then((data) => {
+            const messagesLogged = data.messages_logged;
+            const messagesLoggedElement = document.getElementById("messages-logged");
+            const formattedMessagesLogged = messagesLogged.toLocaleString();
+            messagesLoggedElement.textContent = formattedMessagesLogged;
+            
             const weather = data.weather;
             const weatherElement = document.getElementById("weather");
             weatherElement.textContent = weather;
