@@ -95,8 +95,8 @@ def dynmap():
 
 @app.errorhandler(404)  # 404 page
 def page_not_found(error):
-    with open("error_log.txt", "a") as f:
-        f.write(f"Error {error} on URL: {request.url} at time: {int(time.time())}\n")
+    #with open("error_log.txt", "a") as f:
+        #f.write(f"Error {error} on URL: {request.url} at time: {int(time.time())}\n")
     return render_template("404.html"), 404
 
 @app.route("/sign_in")  # Sign in page
@@ -107,11 +107,16 @@ def sign_in():
 def chat():
     return render_template("chat.html")
 
-# NOTE API stuff
-cache = TTLCache(maxsize=1, ttl=1)
 
-@cached(cache)
+
+# NOTE API stuff
+#cache = TTLCache(maxsize=20, ttl=2) 
+"""BUG cache throws I/O error. This didn't happen before, probably because the caches weren't
+actually being applied to the function since the decorator was was above the flask route.
+"""
+
 @app.route("/get_player_data", methods=["GET"])
+#@cached(cache)
 def get_player_data():
     try:
         request = requests.get(PLAYER_API)
@@ -125,8 +130,8 @@ def get_player_data():
         logging.error(f"Internal error on get_player_data: {e}")
         return "Internal error on get_player_data", 500
 
-@cached(cache)
 @app.route("/get_misc", methods=["GET"])
+#@cached(cache)
 def get_misc():
     try:
         request = requests.get(MISC_API)
@@ -139,9 +144,9 @@ def get_misc():
         logging.error(f"Internal error on get_misc: {e}")
         return "Internal error on get_misc", 500
 
-@cached(cache)
 @app.route("/get_skin", methods=["GET"])
-def get_skins():
+#@cached(cache)
+def get_skins():    # TODO fix slowness. The first load after TTL expires is slow. return data, then refresh skins for the next request.
     if not os.path.exists("skins/"):
         os.makedirs("skins/")
         logging.info("Created skins directory")
@@ -166,7 +171,6 @@ def get_skins():
             logging.error(f"Error getting skin: {e}")
             return "Error getting skin", 500
 
-@cached(cache)
 @app.route("/get_online_users", methods=["GET"])
 def get_online_users():
     try:
