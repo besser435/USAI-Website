@@ -146,7 +146,8 @@ def get_misc():
 
 @app.route("/get_skin", methods=["GET"])
 #@cached(cache)
-def get_skins():    # TODO fix slowness. The first load after TTL expires is slow. return data, then refresh skins for the next request.
+# TODO fix slowness. The first load after TTL expires is slow. return data, then refresh skins for the next request.
+def get_skins():    
     if not os.path.exists("skins/"):
         os.makedirs("skins/")
         logging.info("Created skins directory")
@@ -156,20 +157,28 @@ def get_skins():    # TODO fix slowness. The first load after TTL expires is slo
     if not os.path.exists(f"skins/{player}.png")  or (time.time() - os.path.getmtime(f"skins/{player}.png")) > 14400:
         SKINS_URL = f"http://playteawbeta.apexmc.co:1848/tiles/faces/16x16/{player}.png"    # NOTE should be an envar
         response = requests.get(SKINS_URL)
+
         if response.status_code == 200:
             with open(f"skins/{player}.png", "wb") as f:
                 f.write(response.content)
             logging.info(f"Downloaded skin for {player}")
             return send_from_directory("skins/", f"{player}.png")
         else:
-            logging.error(f"Error downloading skin. {response.status_code}")
-            return "Error downloading skin", 500
+            logging.error(f"Error downloading skin from Dynmap. {response.status_code}")
+
+            # Fix for when the file is not on the remote Dynmap, but the player has been indexed before.
+            # This happens after a backup was restored, but did not include the skins directory on the Dynmap.
+            # Players would need to rejoin the server so the Dynmap can store their skin again so we can fetch it.
+            try:
+                return send_from_directory("skins/", f"{player}.png")
+            except Exception as e:
+                return "Skin not present on Dynmap or local disk", 500
     else:
         try:
             return send_from_directory("skins/", f"{player}.png")
         except Exception as e:
-            logging.error(f"Error getting skin: {e}")
-            return "Error getting skin", 500
+            logging.error(f"Error getting skin from local storage: {e}")
+            return "Error getting skin from local storage", 500
 
 @app.route("/get_online_users", methods=["GET"])
 def get_online_users():
