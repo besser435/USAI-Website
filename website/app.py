@@ -19,7 +19,9 @@ logger = logging.getLogger("logger")
 
 last_commit_date = None
 PLAYER_API = app_secrets.PLAYER_API 
+SMP_PLAYER_API = app_secrets.SMP_PLAYER_API
 MISC_API = app_secrets.MISC_API
+SMP_MISC_API = app_secrets.SMP_MISC_API
 AUTHORIZED_API_KEY= app_secrets.AUTHORIZED_API_KEY
 ONLINE_USERS_API = app_secrets.ONLINE_USERS_API
 CHAT_PATH = app_secrets.CHAT_PATH
@@ -85,13 +87,13 @@ def bug_bounty():
 @app.route("/players")  # Chat page
 def players():
     return render_template(
-        "players.html",
-        offline_users=get_player_data(),
+        "players.html"#,
+        #offline_users=get_player_data(),
     )
 
-@app.route("/dynmap")   # Dynmap iframe page
-def dynmap():
-    return render_template("dynmap.html")
+@app.route("/smp_players")
+def smp_players():
+    return render_template("smp_players.html")
 
 @app.errorhandler(404)  # 404 page
 def page_not_found(error):
@@ -122,7 +124,7 @@ def get_player_data():
         request = requests.get(PLAYER_API)
         if request.status_code == 200:
             all_players = request.json()
-            return all_players  # TODO make returned data prettier json dump indent=4
+            return all_players
         else:
             logging.error(f"Internal (hop 1) error on get_player_data: {request.status_code}")
             return "Internal (hop 1) error on get_player_data", 500
@@ -143,6 +145,65 @@ def get_misc():
     except Exception as e:
         logging.error(f"Internal error on get_misc: {e}")
         return "Internal error on get_misc", 500
+
+
+
+
+
+
+
+
+
+
+
+
+
+@app.route("/get_smp_player_data", methods=["GET"])
+def get_smp_player_data():
+    try:
+        request = requests.get(SMP_PLAYER_API)
+        if request.status_code == 200:
+            all_players = request.json()
+            return all_players
+        else:
+            logging.error(f"Internal (hop 1) error on get_player_data: {request.status_code}")
+            return "Internal (hop 1) error on get_player_data", 500
+    except Exception as e:
+        logging.error(f"Internal error on get_player_data: {e}")
+        return "Internal error on get_player_data", 500
+
+
+@app.route("/get_smp_misc", methods=["GET"])
+def get_smp_misc():
+    try:
+        request = requests.get(SMP_MISC_API)
+        if request.status_code == 200:
+            return request.json()
+        else:
+            logging.error(f"Internal (hop 1) error on get_misc: {request.status_code}")
+            return "Internal (hop 1) error on get_misc", 500
+    except Exception as e:
+        logging.error(f"Internal error on get_misc: {e}")
+        return "Internal error on get_misc", 500
+
+
+
+
+@app.route("/get_smp_skin", methods=["GET"])
+def get_smp_skins():
+    uuid = request.args.get("uuid")
+    return send_from_directory("../../1_billion_gecs/bluemap_players/bluemap_skins", f"{uuid}.png") # the shitfuck
+
+
+
+
+
+
+
+
+
+
+
 
 @app.route("/get_skin", methods=["GET"])
 #@cached(cache)

@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Players - USA Industries{% endblock %}
+{% block title %}SMP Players - USA Industries{% endblock %}
 {% block content %}
-    <script src="/static/js/players.js"></script>
-        <h2 style="margin: 20px auto;">TEAW Player Data</h2>
+    <script src="/static/js/smp_players.js"></script>
+        <h2 style="margin: 20px auto;">TEAW SMP Player Data</h2>
 
 
         <input type="text" id="user-search" autocomplete="off" spellcheck="false" class="search" placeholder="Search for players, towns, or nations">
         <a href="#" id="help-button">?</a>
-        <p>Automatic town and nation data updates halted while a critical bug is investigated. Last manual update: 2-24-2023</p>
+        <p>Towny information is not yet implemented.</p>
         <h3>Click on a player for more info</h3>
         <div class="main-players">
             <div class="player-grid-container"></div>
@@ -35,8 +35,12 @@
                 <p id="total-player-count">Loading...</p>
             </div>
             <div class="info-card">
-                <h3>Weather</h3>
-                <p id="weather">Loading...</p>
+                <h3>Heartbeat</h3>
+                <p id="heartbeat">Loading...</p>
+                <span id="active-info-tooltip" class="tooltip-icon">i
+                    <span class="tooltip-content">This shows if the data is live, and nothing is offline. 
+                        This should display the current time to within one minute.</span>
+                </span>
             </div>
         
             <div class="info-card">
@@ -57,10 +61,7 @@
             <h1 style="margin-top: 0px;">What is this?</h1>
                 <p>This page displays the last online time for players, like an offline version of the '/seen' command.
                 The data is updated automatically, so no need for page refreshes!<br><br>
-    
-                Please note that the data is available only for players who have
-                logged in since September 13th, 2023. If you can't find a specific username, it means that player
-                hasn't logged in since then.
+                Click on a player to see more information about them, like their town and nation, and what dimension they are in.
                 </p>
 
             <h3>Known Issues:</h3>
@@ -69,13 +70,16 @@
                 <p>See <a href="https://usa-industries.net/bug_bounty" target="_blank">Bug Bounty</a> to report any bugs you find.</p>
                 
             <h3>Planned Features:</h3>
-                <p>Add card flipping animation to replace alert for Towny info.</p>
+                <p>Add card flipping animation to replace alert() for Towny info.</p>
                 <!-- <p style="margin-bottom: 0px;">None for now.</p> -->
         </div>
     </div>
 
+
     <style> 
-        /* TODO: responsive design 
+        /* TODO: 
+        Move all CSS to separate files (too lazy rn)
+        responsive design 
         pfp should be em units. they seem to ignore the padding though
         BUG em scales well, but overflows in the container
         */
@@ -88,9 +92,9 @@
         }
 
         .player-username, .player-last-online, .player-town {
-            white-space: normal;       /* Keeps the text in a single line */
-            overflow: hidden;          /* Hides any content that overflows the element's box */
-            text-overflow: ellipsis;   /* Adds an ellipsis to indicate that there is more content */
+            white-space: normal;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .player-grid-container {
@@ -150,10 +154,9 @@
 
 
         /* Media query for smaller screens */
-        @media screen and (max-width: 950px) { /* Adjust 600px to the breakpoint you need */
+        @media screen and (max-width: 950px) {
             .player-profile-pic {
-                height: 2em; /* Smaller size for smaller screens */
-                /* other styles if needed */
+                height: 2em;
             }
         }
 
@@ -169,15 +172,14 @@
 
         .info-card {
             position: relative;
-            flex-basis: 20%; /* Adjust this percentage based on how many items you want in a row */
+            flex-basis: 20%;
             margin: 10px;
-            /* Additional styling for info-card */
         }
 
         .tooltip-icon {
             position: absolute;
             top: -10px;
-            right: -10px;
+            left: -10px;
             width: 20px;
             height: 20px;
             line-height: 20px;
@@ -203,8 +205,6 @@
             left: 50%;
             transform: translateX(-50%);
         }
-
-
 
         .tooltip-icon:hover .tooltip-content {
             visibility: visible;
