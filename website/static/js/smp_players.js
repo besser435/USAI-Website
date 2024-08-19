@@ -1,4 +1,4 @@
-function formatLastOnline(lastOnlineTimestamp) {
+function formatLastOnline(lastOnlineTimestamp, playerPositionTimestamp) {
     const now = new Date();
     const lastOnline = new Date(parseInt(lastOnlineTimestamp) * 1000); // Convert to milliseconds
     const timeDiff = now - lastOnline;
@@ -7,6 +7,15 @@ function formatLastOnline(lastOnlineTimestamp) {
     const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+
+    const AFKTimeout = 180;
+    const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+    const timeSinceLastMove = currentTime - playerPositionTimestamp;
+    const isAFK = timeSinceLastMove > AFKTimeout && lastOnlineTimestamp > currentTime - 10;
+
+    if (isAFK) {
+        return "Currently AFK";
+    }
 
     if (timeDiff < 10_000) { // Same as the online check interval
         return "Currently online";
@@ -19,7 +28,8 @@ function formatLastOnline(lastOnlineTimestamp) {
     }
 }
 
-// NOTE does not show text when no players are found
+
+// BUG does not show text when no players are found
 function searchForPlayers(searchText) {
     const playerCards = document.querySelectorAll(".player-card");
 
@@ -44,14 +54,7 @@ function searchForPlayers(searchText) {
 }
 
 
-
-
-
-// BUG setting the timezone manually on Windows on Chrome and Firefox will result in the last online time being wrong.
-
-
-
-
+// BUG setting the timezone manually on Chrome and Firefox will result in the last online time being wrong.
 
 
 let onlinePlayerCount = 0;
@@ -90,6 +93,15 @@ function updatePlayerInfo() {
                 profilePic.src = `/get_smp_skin?uuid=${player.uuid}`;
                 profilePic.alt = "Profile Picture";
                 playerCard.appendChild(profilePic);
+
+                const AFKTimeout = 180;
+                const currentTime = Math.floor(Date.now() / 1000);
+                const timeSinceLastMove = currentTime - player.position_timestamp;
+                const isAFK = timeSinceLastMove > AFKTimeout && player.last_on_time > currentTime - 10;
+
+                if (isAFK) {
+                    profilePic.style.filter = "grayscale(100%)"; // Grey out the profile picture
+                }
                 
                 // Add the username
                 const username = document.createElement("p");
@@ -98,7 +110,7 @@ function updatePlayerInfo() {
                 playerCard.appendChild(username);
                 
                 // Add the last online info
-                const formattedLastOnline = formatLastOnline(player.last_on_time);
+                const formattedLastOnline = formatLastOnline(player.last_on_time, player.position_timestamp);
                 const lastOnline = document.createElement("p");
                 lastOnline.className = "player-last-online";
                 lastOnline.textContent = formattedLastOnline;

@@ -149,15 +149,6 @@ def get_misc():
 
 
 
-
-
-
-
-
-
-
-
-
 @app.route("/get_smp_player_data", methods=["GET"])
 def get_smp_player_data():
     try:
