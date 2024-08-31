@@ -7,11 +7,12 @@ import datetime
 import requests
 import app_secrets
 import csv
+import yaml
 
 from cachetools import TTLCache, cached
 
 from flask import (Flask, redirect, render_template, request, abort,
-                   send_from_directory, url_for, jsonify)
+                   send_from_directory, url_for, jsonify, Response)
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -25,6 +26,7 @@ SMP_MISC_API = app_secrets.SMP_MISC_API
 AUTHORIZED_API_KEY= app_secrets.AUTHORIZED_API_KEY
 ONLINE_USERS_API = app_secrets.ONLINE_USERS_API
 CHAT_PATH = app_secrets.CHAT_PATH
+PRICES_FILE_PATH = app_secrets.PRICES_FILE_PATH
 
 
 # NOTE Variables
@@ -112,13 +114,8 @@ def chat():
 
 
 # NOTE API stuff
-#cache = TTLCache(maxsize=20, ttl=2) 
-"""BUG cache throws I/O error. This didn't happen before, probably because the caches weren't
-actually being applied to the function since the decorator was was above the flask route.
-"""
-
+# TODO: move all API routes /api/, and maybe put them in a different file
 @app.route("/get_player_data", methods=["GET"])
-#@cached(cache)
 def get_player_data():
     try:
         request = requests.get(PLAYER_API)
@@ -133,7 +130,6 @@ def get_player_data():
         return "Internal error on get_player_data", 500
 
 @app.route("/get_misc", methods=["GET"])
-#@cached(cache)
 def get_misc():
     try:
         request = requests.get(MISC_API)
@@ -145,9 +141,6 @@ def get_misc():
     except Exception as e:
         logging.error(f"Internal error on get_misc: {e}")
         return "Internal error on get_misc", 500
-
-
-
 
 @app.route("/get_smp_player_data", methods=["GET"])
 def get_smp_player_data():
@@ -178,59 +171,47 @@ def get_smp_misc():
         return "Internal error on get_misc", 500
 
 
-
-
 @app.route("/get_smp_skin", methods=["GET"])
 def get_smp_skins():
     uuid = request.args.get("uuid")
     return send_from_directory("../../1_billion_gecs/bluemap_players/bluemap_skins", f"{uuid}.png") # the shitfuck
 
 
-
-
-
-
-
-
-
-
-
-
 @app.route("/get_skin", methods=["GET"])
-#@cached(cache)
-# TODO fix slowness. The first load after TTL expires is slow. return data, then refresh skins for the next request.
-def get_skins():    
+def get_skins():    # TODO slowness happens because of HTTP request to the dynmap.
     if not os.path.exists("skins/"):
         os.makedirs("skins/")
         logging.info("Created skins directory")
 
     player = request.args.get("player")
     # Create skins for new players/give skins a TTL of 4 hours
-    if not os.path.exists(f"skins/{player}.png")  or (time.time() - os.path.getmtime(f"skins/{player}.png")) > 14400:
-        SKINS_URL = f"http://playteawbeta.apexmc.co:1848/tiles/faces/16x16/{player}.png"    # NOTE should be an envar
-        response = requests.get(SKINS_URL)
 
-        if response.status_code == 200:
-            with open(f"skins/{player}.png", "wb") as f:
-                f.write(response.content)
-            logging.info(f"Downloaded skin for {player}")
-            return send_from_directory("skins/", f"{player}.png")
-        else:
-            logging.error(f"Error downloading skin from Dynmap. {response.status_code}")
+    # NOTE Disabled while the Dynmap is offline.
+    # if not os.path.exists(f"skins/{player}.png")  or (time.time() - os.path.getmtime(f"skins/{player}.png")) > 14400:
+    #     SKINS_URL = f"http://playteawbeta.apexmc.co:1848/tiles/faces/16x16/{player}.png"    # NOTE should be an envar
+    #     response = requests.get(SKINS_URL)
 
-            # Fix for when the file is not on the remote Dynmap, but the player has been indexed before.
-            # This happens after a backup was restored, but did not include the skins directory on the Dynmap.
-            # Players would need to rejoin the server so the Dynmap can store their skin again so we can fetch it.
-            try:
-                return send_from_directory("skins/", f"{player}.png")
-            except Exception as e:
-                return "Skin not present on Dynmap or local disk", 500
-    else:
-        try:
-            return send_from_directory("skins/", f"{player}.png")
-        except Exception as e:
-            logging.error(f"Error getting skin from local storage: {e}")
-            return "Error getting skin from local storage", 500
+    #     if response.status_code == 200:
+    #         with open(f"skins/{player}.png", "wb") as f:
+    #             f.write(response.content)
+    #         logging.info(f"Downloaded skin for {player}")
+    #         return send_from_directory("skins/", f"{player}.png")
+    #     else:
+    #         logging.error(f"Error downloading skin from Dynmap. {response.status_code}")
+
+    #         # Fix for when the file is not on the remote Dynmap, but the player has been indexed before.
+    #         # This happens after a backup was restored, but did not include the skins directory on the Dynmap.
+    #         # Players would need to rejoin the server so the Dynmap can store their skin again so we can fetch it.
+    #         try:
+    #             return send_from_directory("skins/", f"{player}.png")
+    #         except Exception as e:
+    #             return "Skin not present on Dynmap or local disk", 500
+    #else:
+    try:
+        return send_from_directory("skins/", f"{player}.png")
+    except Exception as e:
+        logging.error(f"Error getting skin from local storage: {e}")
+        return "Error getting skin from local storage", 500
 
 @app.route("/get_online_users", methods=["GET"])
 def get_online_users():
@@ -245,7 +226,7 @@ def get_online_users():
         logging.error(f"Internal error on get_misc: {e}")
         return "Internal error on get_misc", 500
 
-@app.route("/get_new_messages", methods=["GET"])    # Update chat messages on /chat
+@app.route("/get_new_messages", methods=["GET"])
 def get_new_messages():
     messages = []
     last_timestamp = request.args.get("lastTimestamp", default="0")  # Get last timestamp from query parameter
@@ -278,6 +259,31 @@ def update_lottery():
     except Exception as e:
         logging.error(f"Internal error on update_lottery: {e}")
         return "Internal error on update_lottery", 500
+
+@app.route("/api/lefo/get_prices", methods=["GET"])
+def get_prices():
+    try:
+        with open(PRICES_FILE_PATH, "r") as f:
+            yaml_str = f.read()  
+
+        print("Prices file sent")
+        return Response(yaml_str, mimetype="application/x-yaml")
+    except Exception as e:
+        print(f"Error fetching prices: {e}")
+        return "Internal Error", 500
+
+@app.route("/api/lefo/update_telemetry", methods=["POST"])
+def save_telemetry():
+    try:
+        data = request.json
+        with open("telemetry.json", "a") as f:
+            f.write(json.dumps(data) + "\n\n")
+
+        print("Telemetry data saved")
+        return "OK", 200
+    except Exception as e:
+        print(f"Error saving telemetry data: {e}")
+        return "Internal Error", 500
 
 
 if __name__ == "__main__":
