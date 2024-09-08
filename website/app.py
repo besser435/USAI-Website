@@ -174,7 +174,7 @@ def get_smp_misc():
 @app.route("/get_smp_skin", methods=["GET"])
 def get_smp_skins():
     uuid = request.args.get("uuid")
-    return send_from_directory("../../1_billion_gecs/bluemap_players/bluemap_skins", f"{uuid}.png") # the shitfuck
+    return send_from_directory("../../1_billion_gecs/smp_bluemap_players/bluemap_skins", f"{uuid}.png") # the shitfuck
 
 
 @app.route("/get_skin", methods=["GET"])
@@ -260,31 +260,41 @@ def update_lottery():
         logging.error(f"Internal error on update_lottery: {e}")
         return "Internal error on update_lottery", 500
 
-@app.route("/api/lefo/get_prices", methods=["GET"])
-def get_prices():
-    try:
-        with open(PRICES_FILE_PATH, "r") as f:
-            yaml_str = f.read()  
 
-        print("Prices file sent")
-        return Response(yaml_str, mimetype="application/x-yaml")
-    except Exception as e:
-        print(f"Error fetching prices: {e}")
-        return "Internal Error", 500
 
-@app.route("/api/lefo/update_telemetry", methods=["POST"])
-def save_telemetry():
-    try:
-        data = request.json
-        with open("telemetry.json", "a") as f:
-            f.write(json.dumps(data) + "\n\n")
+# @app.route("/api/lep/get_prices", methods=["GET"])
+# def get_prices():
+#     try:
+#         with open(PRICES_FILE_PATH, "r") as f:
+#             yaml_str = f.read()  
 
-        print("Telemetry data saved")
-        return "OK", 200
-    except Exception as e:
-        print(f"Error saving telemetry data: {e}")
-        return "Internal Error", 500
+#         print("Prices file sent")
+#         return Response(yaml_str, mimetype="application/x-yaml")
+#     except Exception as e:
+#         print(f"Error fetching prices: {e}")
+#         return "Internal Error", 500
+
+# @app.route("/api/lep/update_telemetry", methods=["POST"])
+# def save_telemetry():
+#     try:
+#         print(request)
+#         data = request.json
+#         # TODO: de-bung this
+#         with open("telemetry.txt", "a") as f:   # TODO: format as proper JSON
+#             f.write(json.dumps(data) + "\n")
+
+#         print("Telemetry data saved")
+#         return "OK", 200
+#     except Exception as e:
+#         print(f"Error saving telemetry data: {e}")
+
+#         with open("error.txt", "a") as f:
+#             f.write(request.input_stream)
+#             f.write(request)
+#             f.write("\n\n")
+
+#         #return "Internal Error", 500
 
 
 if __name__ == "__main__":
-   app.run()
+   app.run(port=5005)

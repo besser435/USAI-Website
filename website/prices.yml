@@ -1,0 +1,19 @@
+# The player gets this item, the exchange gets diamonds.
+sell:
+  - item: minecraft:oak_log
+    item_quantity: 64
+    get:
+      item: minecraft:diamond
+      payment_amount: 1
+
+  - item: minecraft:stone
+    item_quantity: 128
+    get:
+      item: minecraft:diamond
+      payment_amount: 1
+
+  - item: create:precision_mechanism
+    item_quantity: 16
+    get:
+      item: minecraft:diamond
+      payment_amount: 1
