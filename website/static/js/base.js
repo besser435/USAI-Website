@@ -17,6 +17,10 @@ switch (currentPath) {
         const smpPlayersLink = document.getElementById("smp-players-link");
         smpPlayersLink.classList.add("active");
         break;
+    case "/cc_players":
+        const ccPlayersLink = document.getElementById("cc-players-link");
+        ccPlayersLink.classList.add("active");
+        break;
     case "/chat":
         const chatLink = document.getElementById("chat-link");
         chatLink.classList.add("active");

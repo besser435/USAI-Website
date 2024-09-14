@@ -28,6 +28,8 @@ ONLINE_USERS_API = app_secrets.ONLINE_USERS_API
 CHAT_PATH = app_secrets.CHAT_PATH
 PRICES_FILE_PATH = app_secrets.PRICES_FILE_PATH
 
+CC_MISC_API = app_secrets.CC_MISC_API
+CC_PLAYER_API = app_secrets.CC_PLAYER_API
 
 # NOTE Variables
 jackpot = 0 
@@ -96,6 +98,10 @@ def players():
 @app.route("/smp_players")
 def smp_players():
     return render_template("smp_players.html")
+
+@app.route("/cc_players")
+def cc_players():
+    return render_template("cc_players.html")
 
 @app.errorhandler(404)  # 404 page
 def page_not_found(error):
@@ -175,6 +181,41 @@ def get_smp_misc():
 def get_smp_skins():
     uuid = request.args.get("uuid")
     return send_from_directory("../../1_billion_gecs/smp_bluemap_players/bluemap_skins", f"{uuid}.png") # the shitfuck
+
+
+@app.route("/get_cc_player_data", methods=["GET"])
+def get_cc_player_data():
+    try:
+        request = requests.get(CC_PLAYER_API)
+        if request.status_code == 200:
+            all_players = request.json()
+            return all_players
+        else:
+            logging.error(f"Internal (hop 1) error on get_player_data: {request.status_code}")
+            return "Internal (hop 1) error on get_player_data", 500
+    except Exception as e:
+        logging.error(f"Internal error on get_player_data: {e}")
+        return "Internal error on get_player_data", 500
+    
+    
+@app.route("/get_cc_misc", methods=["GET"])
+def get_cc_misc():
+    try:
+        request = requests.get(CC_MISC_API)
+        if request.status_code == 200:
+            return request.json()
+        else:
+            logging.error(f"Internal (hop 1) error on get_misc: {request.status_code}")
+            return "Internal (hop 1) error on get_misc", 500
+    except Exception as e:
+        logging.error(f"Internal error on get_misc: {e}")
+        return "Internal error on get_misc", 500
+
+
+@app.route("/get_cc_skin", methods=["GET"])
+def get_cc_skins():
+    uuid = request.args.get("uuid")
+    return send_from_directory("../../1_billion_gecs/cc_bluemap_players/bluemap_skins", f"{uuid}.png") # the shitfuck
 
 
 @app.route("/get_skin", methods=["GET"])
