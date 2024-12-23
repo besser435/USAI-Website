@@ -5,6 +5,10 @@ switch (currentPath) {
         const homeLink = document.getElementById("home-link");
         homeLink.classList.add("active");
         break;
+    case "/fish":
+        const fishLink = document.getElementById("fish-link");
+        fishLink.classList.add("active");
+        break;
     case "/lottery":
         const lotteryLink = document.getElementById("lottery-link");
         lotteryLink.classList.add("active");

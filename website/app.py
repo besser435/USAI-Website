@@ -117,6 +117,10 @@ def sign_in():
 def chat():
     return render_template("chat.html")
 
+@app.route("/fish")  # Chat page
+def fish():
+    return render_template("fish.html")
+
 
 
 # NOTE API stuff

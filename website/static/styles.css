@@ -34,7 +34,7 @@ body::before {
 
     background-repeat: repeat;
     background-position: 0 0;
-    animation: scrollBackground 90s linear infinite;
+    animation: scrollBackground 60s linear infinite;
 }
 
 @keyframes scrollBackground {

@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% block title %}fishe{% endblock %}
+{% block content %}
+
+<div class="header">
+    <h1>low effort fishe :3 leaderboard</h1>
+</div>
+<!-- <sub style="color: grey;">This page does not update itself like other pages. You must refresh this tab to get updates.</sub> 
+
+Not true anymore
+-->
+
+<div class="leaderboard-container">
+    <div class="leaderboard-header">
+        <div class="rank-container"><div class="label">Rank</div></div>
+        <div class="player-info">Player</div>
+        <div class="fish-container"><div class="label">Fish Caught</div></div>
+    </div>
+</div>
+
+<script>
+    let cachedLeaderboard = []; // Cache the leaderboard data
+
+    function updateLeaderboard() {
+        fetch("https://toendallwars.org/api/fishing_leaderboard")
+            .then(response => response.json())
+            .then(data => {
+                // If the new data is the same as the cached data, don't update the DOM
+                const dataString = JSON.stringify(data);
+                const cacheString = JSON.stringify(cachedLeaderboard);
+                if (dataString === cacheString) return; // Skip update
+
+                // Update the cache
+                cachedLeaderboard = data;
+
+                const leaderboardContainer = document.querySelector(".leaderboard-container");
+                const headerRow = leaderboardContainer.querySelector(".leaderboard-header");
+
+                // Keep the header and clear the rest
+                leaderboardContainer.innerHTML = "";
+                leaderboardContainer.appendChild(headerRow);
+
+                data.forEach((entry, index) => {
+                    const entryContainer = document.createElement("div");
+                    entryContainer.classList.add("leaderboard-entry");
+                    entryContainer.setAttribute("uuid", entry.uuid);
+                    entryContainer.id = index + 1;
+
+                    const rankContainer = document.createElement("div");
+                    rankContainer.classList.add("rank-container");
+
+                    const rank = document.createElement("div");
+                    rank.classList.add("rank");
+                    rank.textContent = `#${index + 1}`;
+
+                    rankContainer.appendChild(rank);
+                    entryContainer.appendChild(rankContainer);
+
+                    const PFP = document.createElement("img");
+                    PFP.classList.add("pfp");
+                    PFP.src = `https://toendallwars.org/api/player_face/${entry.uuid}`;
+                    entryContainer.appendChild(PFP);
+
+                    const name = document.createElement("div");
+                    name.classList.add("name");
+                    fetch(`https://toendallwars.org/api/uuid_to_name/${entry.uuid}`)
+                        .then(response => response.text())
+                        .then(data => {
+                            name.textContent = data;
+                        });
+                    entryContainer.appendChild(name);
+
+                    const fishContainer = document.createElement("div");
+                    fishContainer.classList.add("fish-container");
+
+                    const fishTotal = document.createElement("div");
+                    fishTotal.classList.add("fish-total");
+                    fishTotal.textContent = entry.fish_caught;
+
+                    fishContainer.appendChild(fishTotal);
+                    entryContainer.appendChild(fishContainer);
+
+                    leaderboardContainer.appendChild(entryContainer);
+                });
+            })
+            .catch(error => console.error("Error fetching leaderboard:", error));
+    }
+    updateLeaderboard();
+    setInterval(updateLeaderboard, 5_000);
+
+</script>
+
+<style>
+    .leaderboard-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        padding: 20px;
+        border-radius: 16px;
+    }
+
+    .leaderboard-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 80%;
+        max-width: 600px;
+        padding: 0 20px;
+        color: #fff;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.8em;
+    }
+
+    .leaderboard-entry {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 80%;
+        max-width: 600px;
+        background-color: #333;
+        padding: 10px 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .rank-container, .fish-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 60px;
+    }
+
+    .player-info {
+        flex-grow: 1;
+        text-align: left;
+        margin-left: 68px;
+    }
+
+    .rank {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #fff;
+        text-align: center;
+    }
+
+    .pfp {
+        width: 48px;
+        height: 48px;
+        border-radius: 5%;
+        margin-right: 20px;
+        image-rendering: pixelated;
+    }
+
+    .name {
+        flex-grow: 1;
+        font-size: 1.2em;
+        font-weight: 500;
+        color: #fff;
+        text-align: left;
+    }
+
+    .fish-total {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #007BFF;
+        text-align: center;
+    }
+
+    @media (max-width: 950px) {
+        .leaderboard-entry, .leaderboard-header {
+            max-width: 100%;
+            width: 100%;
+        }
+        
+        .leaderboard-container {
+            padding: 10px;
+        }
+
+        .pfp {
+            width: 32px;
+            height: 32px;
+            margin-right: 10px;
+        }
+
+        .player-info {
+            margin-left: 42px;
+        }
+    }
+</style>
+
+{% endblock %}
