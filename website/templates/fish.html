@@ -7,7 +7,8 @@
 </div>
 <!-- <sub style="color: grey;">This page does not update itself like other pages. You must refresh this tab to get updates.</sub> 
 
-Not true anymore
+Not true
+
 -->
 
 <div class="leaderboard-container">
@@ -28,80 +29,64 @@ Not true anymore
                 // If the new data is the same as the cached data, don't update the DOM
                 const dataString = JSON.stringify(data);
                 const cacheString = JSON.stringify(cachedLeaderboard);
-                if (dataString === cacheString) return; // Skip update
+                if (dataString === cacheString) return;
 
-                // Prefetch all names and images (images dont seem to be cached. they flash when updated)
-                const prefetchPromises = data.map(entry => {
-                    const namePromise = fetch(`https://toendallwars.org/api/uuid_to_name/${entry.uuid}`)
+                cachedLeaderboard = data;
+
+                const leaderboardContainer = document.querySelector(".leaderboard-container");
+                const headerRow = leaderboardContainer.querySelector(".leaderboard-header");
+
+                // Keep the header and clear the rest
+                leaderboardContainer.innerHTML = "";
+                leaderboardContainer.appendChild(headerRow);
+
+                data.forEach((entry, index) => {
+                    const entryContainer = document.createElement("div");
+                    entryContainer.classList.add("leaderboard-entry");
+                    entryContainer.setAttribute("uuid", entry.uuid);
+                    entryContainer.id = index + 1;
+
+                    const rankContainer = document.createElement("div");
+                    rankContainer.classList.add("rank-container");
+
+                    const rank = document.createElement("div");
+                    rank.classList.add("rank");
+                    rank.textContent = `#${index + 1}`;
+
+                    rankContainer.appendChild(rank);
+                    entryContainer.appendChild(rankContainer);
+
+                    const PFP = document.createElement("img");
+                    PFP.classList.add("pfp");
+                    PFP.src = `https://toendallwars.org/api/player_face/${entry.uuid}`;
+                    entryContainer.appendChild(PFP);
+
+                    const name = document.createElement("div");
+                    name.classList.add("name");
+                    fetch(`https://toendallwars.org/api/uuid_to_name/${entry.uuid}`)
                         .then(response => response.text())
-                        .then(name => {
-                            entry.name = name;
+                        .then(data => {
+                            name.textContent = data;
                         });
+                    entryContainer.appendChild(name);
 
-                    const imagePromise = fetch(`https://toendallwars.org/api/player_face/${entry.uuid}`)
-                        .then(() => {
-                            entry.imageSrc = `https://toendallwars.org/api/player_face/${entry.uuid}`;
-                        });
+                    const fishContainer = document.createElement("div");
+                    fishContainer.classList.add("fish-container");
 
-                    return Promise.all([namePromise, imagePromise]);
-                });
+                    const fishTotal = document.createElement("div");
+                    fishTotal.classList.add("fish-total");
+                    fishTotal.textContent = entry.fish_caught;
 
-                Promise.all(prefetchPromises).then(() => {
-                    cachedLeaderboard = data;
+                    fishContainer.appendChild(fishTotal);
+                    entryContainer.appendChild(fishContainer);
 
-                    const leaderboardContainer = document.querySelector(".leaderboard-container");
-                    const headerRow = leaderboardContainer.querySelector(".leaderboard-header");
-
-                    // Keep the header and clear the rest
-                    leaderboardContainer.innerHTML = "";
-                    leaderboardContainer.appendChild(headerRow);
-
-                    data.forEach((entry, index) => {
-                        const entryContainer = document.createElement("div");
-                        entryContainer.classList.add("leaderboard-entry");
-                        entryContainer.setAttribute("uuid", entry.uuid);
-                        entryContainer.id = index + 1;
-
-                        const rankContainer = document.createElement("div");
-                        rankContainer.classList.add("rank-container");
-
-                        const rank = document.createElement("div");
-                        rank.classList.add("rank");
-                        rank.textContent = `#${index + 1}`;
-
-                        rankContainer.appendChild(rank);
-                        entryContainer.appendChild(rankContainer);
-
-                        const PFP = document.createElement("img");
-                        PFP.classList.add("pfp");
-                        PFP.src = entry.imageSrc;
-                        entryContainer.appendChild(PFP);
-
-                        const name = document.createElement("div");
-                        name.classList.add("name");
-                        name.textContent = entry.name;
-                        entryContainer.appendChild(name);
-
-                        const fishContainer = document.createElement("div");
-                        fishContainer.classList.add("fish-container");
-
-                        const fishTotal = document.createElement("div");
-                        fishTotal.classList.add("fish-total");
-                        fishTotal.textContent = entry.fish_caught;
-
-                        fishContainer.appendChild(fishTotal);
-                        entryContainer.appendChild(fishContainer);
-
-                        leaderboardContainer.appendChild(entryContainer);
-                    });
+                    leaderboardContainer.appendChild(entryContainer);
                 });
             })
             .catch(error => console.error("Error fetching leaderboard:", error));
     }
-
     updateLeaderboard();
-    setInterval(updateLeaderboard, 15_000);
-
+    setInterval(updateLeaderboard, 5_000);
 </script>
 
 <style>
