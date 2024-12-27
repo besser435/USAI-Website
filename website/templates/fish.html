@@ -77,7 +77,7 @@ Not true
 
                     const fishTotal = document.createElement("div");
                     fishTotal.classList.add("fish-total");
-                    fishTotal.textContent = entry.fish_caught;
+                    fishTotal.textContent = entry.fish_caught.toLocaleString();
 
                     fishContainer.appendChild(fishTotal);
                     entryContainer.appendChild(fishContainer);
