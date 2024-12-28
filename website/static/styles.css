@@ -652,6 +652,10 @@ p {
         align-items: center;
     }
 
+    .main-content {
+        min-height: 0;
+    }
+
 
     /* Box template */
     .box {
